@@ -6,6 +6,7 @@ import { Model } from 'mongoose';
 import {
   FileInventory,
   FileInventoryDocument,
+  FileStatus,
 } from './schemas/file-inventory.schema';
 import { UploadFileDto } from './dto/upload-file.dto';
 import { KafkaService } from '../kafka/kafka.service';
@@ -14,11 +15,12 @@ import * as path from 'path';
 import { DataScanResultDocument } from './schemas/data-scan-result.schema';
 import { DataScanResult } from './schemas/data-scan-result.schema';
 import { Client } from 'minio';
+import { ConfigService } from '@nestjs/config';
 
 @Injectable()
 export class FileService {
   private minioClient: Client;
-  private readonly bucketName = 'uploads';
+  private readonly bucketName: string;
 
   constructor(
     @InjectModel(FileInventory.name)
@@ -26,14 +28,20 @@ export class FileService {
     @InjectModel(DataScanResult.name)
     private dataScanResultModel: Model<DataScanResultDocument>,
     private readonly kafkaService: KafkaService,
+    private readonly configService: ConfigService,
   ) {
+    this.bucketName = this.configService.get<string>(
+      'MINIO_BUCKET_NAME',
+      'uploads',
+    );
+
     // Initialize MinIO client
     this.minioClient = new Client({
-      endPoint: 'localhost', // or from config
-      port: 9000, // or from config
-      useSSL: false, // true for production
-      accessKey: 'minioadmin', // from config
-      secretKey: 'minioadmin', // from config
+      endPoint: this.configService.get<string>('MINIO_ENDPOINT'),
+      port: this.configService.get<number>('MINIO_PORT'),
+      useSSL: this.configService.get('MINIO_USE_SSL') === 'true',
+      accessKey: this.configService.get<string>('MINIO_ACCESS_KEY'),
+      secretKey: this.configService.get<string>('MINIO_SECRET_KEY'),
     });
 
     // Ensure bucket exists
@@ -67,7 +75,7 @@ export class FileService {
       fileName: file.originalname,
       fileType: path.extname(file.originalname).replace('.', ''),
       fileLocation: finalName,
-      status: 'REQ',
+      status: FileStatus.REQUESTED,
     };
 
     // Create initial document in MongoDB
@@ -78,13 +86,13 @@ export class FileService {
     );
 
     // Start upload in background in case file is large and takes time
-    this.uploadFileToMinio(fileId, finalName, file).catch(async (error) => {
+    this.handleUpload(fileId, finalName, file).catch(async (error) => {
       // Update DB with error status if upload fails
       await this.fileInventoryModel.findOneAndUpdate(
         { fileId },
         {
           $set: {
-            status: 'ERROR',
+            status: FileStatus.ERROR,
             errorReason: error.message,
           },
         },
@@ -94,7 +102,7 @@ export class FileService {
     return result;
   }
 
-  private async uploadFileToMinio(
+  private async handleUpload(
     fileId: string,
     finalName: string,
     file: Express.Multer.File,
@@ -115,7 +123,7 @@ export class FileService {
         { fileId },
         {
           $set: {
-            status: 'UPLOADED',
+            status: FileStatus.UPLOADED,
             uploadedAt: new Date(),
           },
         },

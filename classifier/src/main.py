@@ -1,3 +1,4 @@
+from .constants import FileStatus
 from .kafka_consumer import KafkaClient
 from .mongodb_client import MongoDBClient
 from .pii_processor import Processor
@@ -28,7 +29,7 @@ def main():
             # Update status to completed with results
             mongodb_client.update_file_status(
                 file_id,
-                "DONE"
+                FileStatus.DONE.value
             )
             
             mongodb_client.create_classification_results(file_id, results)
@@ -39,7 +40,7 @@ def main():
             if file_id:
                 mongodb_client.update_file_status(
                     file_id,
-                    "ERROR",
+                    FileStatus.ERROR.value,
                     str(e),
                 )
 

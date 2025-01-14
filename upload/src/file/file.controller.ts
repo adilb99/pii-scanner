@@ -39,11 +39,8 @@ export class FileController {
     if (!file) {
       throw new NotFoundException('No file uploaded');
     }
-    // 1) Register file in DB with status = "UPLOADED"
-    const fileDoc = await this.fileService.registerFile(file, uploadDto);
 
-    // 2) Notify the classifier
-    await this.fileService.notifyClassifier(fileDoc);
+    const fileDoc = await this.fileService.registerFile(file, uploadDto);
 
     return {
       message: 'File upload request created successfully.',

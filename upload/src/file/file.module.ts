@@ -12,6 +12,7 @@ import {
   DataScanResult,
   DataScanResultSchema,
 } from './schemas/data-scan-result.schema';
+import { ConfigModule } from '@nestjs/config';
 
 @Module({
   imports: [
@@ -23,6 +24,7 @@ import {
       { name: DataScanResult.name, schema: DataScanResultSchema },
     ]),
     KafkaModule,
+    ConfigModule,
   ],
   controllers: [FileController],
   providers: [FileService],

@@ -32,7 +32,7 @@ export class FileInventory {
   fileLocation: string;
 
   @Prop({ default: 'REQ' })
-  status: string;
+  status: FileStatus;
 
   @Prop({ default: null })
   errorReason: string;
@@ -40,3 +40,10 @@ export class FileInventory {
 
 export type FileInventoryDocument = FileInventory & Document;
 export const FileInventorySchema = SchemaFactory.createForClass(FileInventory);
+
+export enum FileStatus {
+  REQUESTED = 'REQ',
+  UPLOADED = 'UPLOADED',
+  DONE = 'DONE',
+  ERROR = 'ERROR',
+}
