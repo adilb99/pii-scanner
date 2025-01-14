@@ -32,7 +32,7 @@ class MongoDBClient:
             
             
 
-    def update_file_status(self, file_id: str, status: str):
+    def update_file_status(self, file_id: str, status: str, error: str = None):
         """
         Updates the file status in `fileInventory` and, if classification results
         are provided, writes them to `dataScanResult`.
@@ -54,7 +54,8 @@ class MongoDBClient:
                 {"fileId": file_id},  # matches the NestJS schema
                 {
                     "$set": {
-                        "status": status
+                        "status": status,
+                        "errorReason": error,
                     }
                 }
             )

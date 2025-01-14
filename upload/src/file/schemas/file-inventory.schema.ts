@@ -31,9 +31,6 @@ export class FileInventory {
   @Prop()
   fileLocation: string;
 
-  @Prop()
-  library: string;
-
   @Prop({ default: 'REQ' })
   status: string;
 

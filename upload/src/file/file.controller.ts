@@ -13,8 +13,7 @@ import {
 import { FileInterceptor } from '@nestjs/platform-express';
 import { FileService } from './file.service';
 import { UploadFileDto } from './dto/upload-file.dto';
-import { diskStorage } from 'multer';
-import { extname } from 'path';
+import { memoryStorage } from 'multer';
 
 @Controller('file')
 export class FileController {
@@ -30,20 +29,7 @@ export class FileController {
   @Post('upload')
   @UseInterceptors(
     FileInterceptor('file', {
-      storage: diskStorage({
-        destination: './uploads',
-        filename: (req, file, callback) => {
-          // Preserve original file extension
-          const fileExtName = extname(file.originalname); // e.g. .csv, .jpg
-
-          // Option 2: Append a timestamp or random suffix to avoid overwriting
-          const nameWithoutExt = file.originalname.replace(fileExtName, '');
-          const randomSuffix =
-            Date.now() + '-' + Math.round(Math.random() * 1e9);
-          const finalName = `${nameWithoutExt}-${randomSuffix}${fileExtName}`;
-          callback(null, finalName);
-        },
-      }),
+      storage: memoryStorage(),
     }),
   )
   async uploadFile(
@@ -60,7 +46,7 @@ export class FileController {
     await this.fileService.notifyClassifier(fileDoc);
 
     return {
-      message: 'File uploaded successfully',
+      message: 'File upload request created successfully.',
       fileId: fileDoc.fileId,
       status: fileDoc.status,
     };
