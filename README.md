@@ -94,9 +94,16 @@ The system uses MongoDB with two main collections:
   fileId: string,      // Reference to FileInventory
   results: [           // Array of PII findings
     {
-      piiType: string,   // Type of PII found (e.g., "Email", "Phone")
-      piiValue: string,  // The detected PII value
-      location: string   // Location in file (e.g., "row: 3, column: Email")
+      "entity_type": "PERSON",    // Type of PII entity detected
+      "start": 2637,              // Starting character position in text
+      "end": 2648,               // Ending character position in text
+      "score": 0.85              // Confidence score of detection (0-1)
+    },
+    {
+      "entity_type": "LOCATION",
+      "start": 2811,
+      "end": 2823,
+      "score": 0.85
     }
   ],
   createdAt: Date,    // Creation timestamp
