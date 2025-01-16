@@ -9,7 +9,7 @@ A microservices-based system that handles file uploads and automatically classif
 
 ## Features
 
-- File upload and management
+- File upload and management via MinIO
 - Asynchronous file processing using Kafka
 - PII detection and classification using Presidio
 - MongoDB storage for file metadata and results
