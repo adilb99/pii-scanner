@@ -37,20 +37,19 @@ A microservices-based system that handles file uploads and automatically classif
 
 ## Running the System
 
+This will start the required infrastructure.
 ```bash
 docker compose up -d
 ```
 
-This will start the required infrastructure.
-
-Start Upload Service:
+Start Upload Service.
 ```bash
 cd upload
 npm install
 npm run start
 ```
 
-Start Classifier Service:
+Start Classifier Service.
 ```bash
 cd classifier
 pip install -r requirements.txt
